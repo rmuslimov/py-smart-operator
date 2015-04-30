@@ -1,3 +1,4 @@
+;; -*- lexical-binding:t -*-
 ;;; py-smart-operator.el --- smart-operator for python
 
 ;; Copyright © 2015 Rustem Muslimov
