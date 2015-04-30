@@ -5,7 +5,7 @@
 ;; Author:     Rustem Muslimov <r.muslimov@gmail.com>
 ;; Version:    0.0.1
 ;; Keywords:   python, convenience, smart-operator
-;; Package-Requires: ((f "0.17.2") (s "1.9.0"))
+;; Package-Requires: ((python-mode))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,7 +26,45 @@
 
 ;;; Code:
 
+(defvar operators
+  (list "+" "=" "-" "/" "&" "*" ">" "<" "%" "|")
+  "Registered operators")
 
+(defun wrap-and-define-key (keymap key func)
+  (define-key keymap key (lambda () (interactive) (funcall func key))))
 
+(defvar py-smart-operator-mode-map
+  (let* ((keymap (make-sparse-keymap)))
+    (progn
+      (dolist (key operators)
+        (wrap-and-define-key keymap key 'py-smart-operator:insert-symbol))
+      keymap))
+  "Update keymap with registered operators")
 
+(define-minor-mode py-smart-operator-mode
+  "Smart operator mode optimized for python"
+  :lighter "PySo"
+  :keymap 'py-smart-operator-mode-map)
+
+(defun previous-operator-were-inserted ()
+  "Calc if previous symbols are operator already"
+  (save-excursion
+    (let ((prev (buffer-substring-no-properties (- (point) 2) (point)))
+          (predicates (mapcar (lambda (x) (concat x " ")) operators)))
+      (if (member prev predicates) t nil)
+      )))
+
+(defun py-smart-operator:insert-symbol (arg)
+  "Differs paren and string context in python file"
+  (if (member (python-syntax-context-type) '(string paren))
+      (insert arg)
+    (cond
+     ((previous-operator-were-inserted)
+      (progn
+        (delete-char -1)
+        (insert (format "%s " arg))))
+     ((eq (char-before) 32) (insert (format "%s " arg)))
+     (t (insert (format " %s " arg))))))
+
+(provide 'py-smart-operator)
 ;;; py-smart-operator.el ends here
