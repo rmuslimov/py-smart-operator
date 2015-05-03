@@ -27,45 +27,75 @@
 
 ;;; Code:
 
-(defvar operators
-  (list "+" "=" "-" "/" "&" "*" ">" "<" "%" "|")
+(defvar py-smart-operator:operators
+  ;;(list "+" "=" "-" "/" "&" "*" ">" "<" "%" "|" ",")
+  '(
+   ;; ( arg in-paren in-global)
+	("+" py-smart-operator:do-wrap py-smart-operator:do-wrap)
+	("-" py-smart-operator:do-wrap py-smart-operator:do-wrap)
+	("/" py-smart-operator:do-wrap py-smart-operator:do-wrap)
+	("=" py-smart-operator:do-nothing py-smart-operator:do-wrap)
+	("," py-smart-operator:do-space-after py-smart-operator:do-space-after)
+	(":" py-smart-operator:do-space-after py-smart-operator:do-space-after)
+    )
   "Registered operators")
 
-(defun wrap-and-define-key (keymap key func)
-  (define-key keymap key (lambda () (interactive) (funcall func key))))
+(defun py-smart-operator:wrap-and-define-key (keymap option)
+  (define-key keymap (car option) (lambda () (interactive) (py-smart-operator:insert-option option))))
 
-(defvar py-smart-operator-mode-map
+(defvar py-smart-operator:mode-map
   (let* ((keymap (make-sparse-keymap)))
     (progn
-      (dolist (key operators)
-        (wrap-and-define-key keymap key 'py-smart-operator:insert-symbol))
+      (dolist (option py-smart-operator:operators)
+        (py-smart-operator:wrap-and-define-key keymap option))
       keymap))
   "Update keymap with registered operators")
 
 (define-minor-mode py-smart-operator-mode
   "Smart operator mode optimized for python"
   :lighter "PySo"
-  :keymap 'py-smart-operator-mode-map)
+  :keymap py-smart-operator:mode-map)
 
-(defun previous-operator-were-inserted ()
-  "Calc if previous symbols are operator already"
-  (save-excursion
-    (let ((prev (buffer-substring-no-properties (- (point) 2) (point)))
-          (predicates (mapcar (lambda (x) (concat x " ")) operators)))
-      (if (member prev predicates) t nil)
-      )))
-
-(defun py-smart-operator:insert-symbol (arg)
-  "Differs paren and string context in python file"
-  (if (member (python-syntax-context-type) '(string paren))
-      (insert arg)
-    (cond
-     ((previous-operator-were-inserted)
+(defun py-smart-operator:insert (arg)
+  (cond
+   ((stringp arg) (insert arg))
+   ((listp arg)
+    (let ((to-delete (nth 1 arg))
+          (to-insert (car arg)))
       (progn
-        (delete-char -1)
-        (insert (format "%s " arg))))
-     ((eq (char-before) 32) (insert (format "%s " arg)))
-     (t (insert (format " %s " arg))))))
+        (delete-char to-delete)
+        (insert to-insert)))
+   )))
+
+(defun py-smart-operator:do-wrap (prev-symbols arg)
+  "Decide what to do inside of paren"
+  (cond
+   ((string= prev-symbols (format "%s " arg))
+    (progn
+      ;; delete last char
+      '((format "%s " arg) -1)))
+   ((string= (last prev-symbols) " ") (format "%s " arg))
+   (t  (format " %s " arg))))
+
+(defun py-smart-operator:do-nothing (prev-symbols arg)
+   (format "%s" arg))
+
+(defun py-smart-operator:do-space-after (prev-symbols arg)
+  (if (string= (last prev-symbols) " ") (py-smart-operator:do-nothing prev-symbols arg)
+    (format "%s " arg)))
+
+(defun py-smart-operator:insert-option (option)
+  "Action!"
+  (let ((prev (buffer-substring-no-properties (- (point) 2) (point)))
+        (arg (car option))
+        (do-when-paren (nth 1 option))
+        (do-when-global (nth 2 option)))
+    (princ do-when-paren)
+    (cond
+     ((member (python-syntax-context-type) '(string paren))
+      (py-smart-operator:insert (do-when-paren prev arg)))
+     (t (py-smart-operator:insert (do-when-global prev arg))))
+    ))
 
 (provide 'py-smart-operator)
 ;;; py-smart-operator.el ends here

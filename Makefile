@@ -1,10 +1,11 @@
+.PHONY: test compile clean-elc install
+
 EMACS ?= emacs
 CASK ?= cask
 
-Install:
+install:
 	${CASK} install
 
-.PHONY: test
 test:
 	${CASK} exec ert-runner
 
