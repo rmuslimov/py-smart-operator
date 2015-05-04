@@ -4,7 +4,7 @@
 ;; Copyright © 2015 Rustem Muslimov
 ;;
 ;; Author:     Rustem Muslimov <r.muslimov@gmail.com>
-;; Version:    0.0.1
+;; Version:    0.1.0
 ;; Keywords:   python, convenience, smart-operator
 ;; Package-Requires: ((python-mode) (s "1.9.0"))
 
@@ -28,6 +28,10 @@
 ;; Python smart-operator mode aims to insert spaces around operators
 ;; when it is required. It was develop especially for python and requires
 ;; python-mode.
+
+;; Add this file to your emacs path, and this lines to emacs initialization script
+;; (require 'py-smart-operator)
+;; (add-hook 'python-mode-hook 'py-smart-operator-mode)
 
 ;;; Code:
 
