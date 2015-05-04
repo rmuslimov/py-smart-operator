@@ -1,5 +1,5 @@
 ;; -*- lexical-binding:t -*-
-;;; py-smart-operator.el --- smart-operator for python
+;;; py-smart-operator.el --- smart-operator for python-mode
 
 ;; Copyright © 2015 Rustem Muslimov
 ;;
@@ -25,6 +25,10 @@
 
 ;;; Commentary:
 
+;; Python smart-operator mode aims to insert spaces around operators
+;; when it is required. It was develop especially for python and requires
+;; python-mode.
+
 ;;; Code:
 
 (defvar py-smart-operator:operators
@@ -36,6 +40,8 @@
 	("=" py-smart-operator:do-nothing py-smart-operator:do-nothing py-smart-operator:do-wrap)
 	("," py-smart-operator:do-nothing py-smart-operator:do-space-after py-smart-operator:do-space-after)
 	(":" py-smart-operator:do-nothing py-smart-operator:do-space-after py-smart-operator:do-nothing)
+	("<" py-smart-operator:do-nothing py-smart-operator:do-nothing py-smart-operator:do-wrap)
+	(">" py-smart-operator:do-nothing py-smart-operator:do-nothin py-smart-operator:do-wrap)
     )
   "Registered operators")
 
