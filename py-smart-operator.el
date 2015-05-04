@@ -6,7 +6,7 @@
 ;; Author:     Rustem Muslimov <r.muslimov@gmail.com>
 ;; Version:    0.0.1
 ;; Keywords:   python, convenience, smart-operator
-;; Package-Requires: ((python-mode))
+;; Package-Requires: ((python-mode) (s "1.9.0"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,17 +28,17 @@
 ;;; Code:
 
 (defvar py-smart-operator:operators
-  ;;(list "+" "=" "-" "/" "&" "*" ">" "<" "%" "|" ",")
   '(
-   ;; ( arg in-paren in-global)
-	("+" py-smart-operator:do-wrap py-smart-operator:do-wrap)
-	("-" py-smart-operator:do-wrap py-smart-operator:do-wrap)
-	("/" py-smart-operator:do-wrap py-smart-operator:do-wrap)
-	("=" py-smart-operator:do-nothing py-smart-operator:do-wrap)
-	("," py-smart-operator:do-space-after py-smart-operator:do-space-after)
-	(":" py-smart-operator:do-space-after py-smart-operator:do-space-after)
+   ;; ( char in-string in-paren in-global)
+	("+" py-smart-operator:do-nothing py-smart-operator:do-wrap py-smart-operator:do-wrap)
+	("-" py-smart-operator:do-nothing py-smart-operator:do-wrap py-smart-operator:do-wrap)
+	("/" py-smart-operator:do-nothing py-smart-operator:do-wrap py-smart-operator:do-wrap)
+	("=" py-smart-operator:do-nothing py-smart-operator:do-nothing py-smart-operator:do-wrap)
+	("," py-smart-operator:do-nothing py-smart-operator:do-space-after py-smart-operator:do-space-after)
+	(":" py-smart-operator:do-nothing py-smart-operator:do-space-after py-smart-operator:do-nothing)
     )
   "Registered operators")
+
 
 (defun py-smart-operator:wrap-and-define-key (keymap option)
   (define-key keymap (car option) (lambda () (interactive) (py-smart-operator:insert-option option))))
@@ -53,10 +53,11 @@
 
 (define-minor-mode py-smart-operator-mode
   "Smart operator mode optimized for python"
-  :lighter "PySo"
-  :keymap py-smart-operator:mode-map)
+  :lighter "PySo" :keymap py-smart-operator:mode-map)
 
 (defun py-smart-operator:insert (arg)
+  "Specific insert allow insert a char, or a list like (char N), where N number of
+   symbols to decrement."
   (cond
    ((stringp arg) (insert arg))
    ((listp arg)
@@ -69,32 +70,35 @@
 
 (defun py-smart-operator:do-wrap (prev-symbols arg)
   "Decide what to do inside of paren"
-  (cond
-   ((string= prev-symbols (format "%s " arg))
-    (progn
-      ;; delete last char
-      '((format "%s " arg) -1)))
-   ((string= (last prev-symbols) " ") (format "%s " arg))
-   (t  (format " %s " arg))))
+  (let ((operator-combinations (mapcar (lambda (x) (format "%s " (car x))) py-smart-operator:operators)))
+    (cond
+     ((member prev-symbols operator-combinations)
+      (progn
+        (list (format "%s " arg) -1)))
+     ((string= (s-right 1 prev-symbols) " ") (format "%s " arg))
+     (t  (format " %s " arg)))
+    ))
 
 (defun py-smart-operator:do-nothing (prev-symbols arg)
-   (format "%s" arg))
+  (format "%s" arg))
 
 (defun py-smart-operator:do-space-after (prev-symbols arg)
   (if (string= (last prev-symbols) " ") (py-smart-operator:do-nothing prev-symbols arg)
     (format "%s " arg)))
 
 (defun py-smart-operator:insert-option (option)
-  "Action!"
+  "Insert required operator by looking to configuration in operators var"
   (let ((prev (buffer-substring-no-properties (- (point) 2) (point)))
         (arg (car option))
-        (do-when-paren (nth 1 option))
-        (do-when-global (nth 2 option)))
-    (princ do-when-paren)
+        (do-when-string (nth 1 option))
+        (do-when-paren (nth 2 option))
+        (do-when-global (nth 3 option)))
     (cond
-     ((member (python-syntax-context-type) '(string paren))
-      (py-smart-operator:insert (do-when-paren prev arg)))
-     (t (py-smart-operator:insert (do-when-global prev arg))))
+     ((eq (python-syntax-context-type) 'string)
+      (py-smart-operator:insert (funcall do-when-string prev arg)))
+     ((eq (python-syntax-context-type) 'paren)
+      (py-smart-operator:insert (funcall do-when-paren prev arg)))
+     (t (py-smart-operator:insert (funcall do-when-global prev arg))))
     ))
 
 (provide 'py-smart-operator)

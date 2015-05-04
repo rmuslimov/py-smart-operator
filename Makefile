@@ -6,7 +6,7 @@ CASK ?= cask
 install:
 	${CASK} install
 
-test:
+test: clean-elc
 	${CASK} exec ert-runner
 
 compile:

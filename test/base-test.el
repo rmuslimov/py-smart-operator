@@ -10,6 +10,11 @@
    (equal (py-smart-operator:do-wrap "." "+") " + "))
   (should
    (equal (py-smart-operator:do-wrap "a " "+") "+ "))
+  )
+
+(ert-deftest do-wrap-with-backward ()
   (should
-   (equal (py-smart-operator:do-wrap "- " "-") '("- " 1)))
+   (equal (py-smart-operator:do-wrap "- " "-") '("- " -1)))
+  (should
+   (equal (py-smart-operator:do-wrap "- " "=") '("= " -1)))
   )
