@@ -35,6 +35,8 @@
 
 ;;; Code:
 
+(require 's)
+
 (defvar py-smart-operator:operators
   '(
    ;; ( char in-string in-paren in-global)
