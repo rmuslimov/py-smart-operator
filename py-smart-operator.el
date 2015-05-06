@@ -64,6 +64,7 @@
       keymap))
   "Update keymap with registered operators")
 
+;;;###autoload
 (define-minor-mode py-smart-operator-mode
   "Smart operator mode optimized for python"
   :lighter "PySo" :keymap py-smart-operator-mode-map)
