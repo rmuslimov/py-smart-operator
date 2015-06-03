@@ -43,7 +43,7 @@
 	("+" py-smart-operator-do-nothing py-smart-operator-do-wrap py-smart-operator-do-wrap)
 	("-" py-smart-operator-do-nothing py-smart-operator-do-wrap py-smart-operator-do-wrap)
 	("/" py-smart-operator-do-nothing py-smart-operator-do-wrap py-smart-operator-do-wrap)
-        ("*" py-smart-operator-do-nothing py-smart-operator-do-wrap py-smart-operator-do-wrap)
+    ("*" py-smart-operator-do-nothing py-smart-operator-do-wrap py-smart-operator-do-wrap)
 	("=" py-smart-operator-do-nothing py-smart-operator-do-nothing py-smart-operator-do-wrap)
 	("," py-smart-operator-do-nothing py-smart-operator-do-space-after py-smart-operator-do-space-after)
 	(":" py-smart-operator-do-nothing py-smart-operator-do-space-after py-smart-operator-do-nothing)
@@ -54,7 +54,8 @@
 
 
 (defun py-smart-operator-wrap-and-define-key (keymap option)
-  (define-key keymap (car option) (lambda () (interactive) (py-smart-operator-insert-option option))))
+  (define-key keymap (car option)
+    (lambda (number) (interactive "p") (dotimes (i number) (py-smart-operator-insert-option option)))))
 
 (defvar py-smart-operator-mode-map
   (let* ((keymap (make-sparse-keymap)))
