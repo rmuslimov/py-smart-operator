@@ -48,7 +48,7 @@
 	("," py-smart-operator-do-nothing py-smart-operator-do-space-after py-smart-operator-do-space-after)
 	(":" py-smart-operator-do-nothing py-smart-operator-do-space-after py-smart-operator-do-nothing)
 	("<" py-smart-operator-do-nothing py-smart-operator-do-nothing py-smart-operator-do-wrap)
-	(">" py-smart-operator-do-nothing py-smart-operator-do-nothin py-smart-operator-do-wrap)
+	(">" py-smart-operator-do-nothing py-smart-operator-do-nothing py-smart-operator-do-wrap)
     )
   "Registered operators")
 
