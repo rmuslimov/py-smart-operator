@@ -1,3 +1,6 @@
+This project deprecated! Please consider using other implementations
+====================================================================
+
 Python smart-operator mode
 --------------------------
 
